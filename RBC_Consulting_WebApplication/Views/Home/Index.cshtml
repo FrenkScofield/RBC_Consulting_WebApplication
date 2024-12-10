@@ -1,0 +1,243 @@
+﻿@model IEnumerable<RBC_Consulting_WebApplication.Models.CustomerInfo>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .img {
+        height: 150px;
+        display: inline;
+        margin: 7px 7px 0px 0px;
+        width: 46%;
+    }
+
+    label {
+        color: #7a7a7a;
+    }
+
+    .thumb-image {
+        height: 100px;
+        width: auto;
+        border: 1px solid lightgray;
+    }
+
+    form {
+        width: 100%;
+    }
+
+    tbody td p {
+        white-space: nowrap;
+        width: 250px;
+        -o-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    dialog:-internal-dialog-in-top-layer::backdrop {
+        position: fixed;
+        inset: 0px;
+        background: #0d0e0ec7;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 my-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-4">
+                Customers
+            </div>
+            <div class="row">
+                <div class="col-md-12 my-4">
+                    <button type="button" class="btn btn-info ml-3" id="addDetails" data-toggle="modal">Add New</button> @await Html.PartialAsync("_AddPartialView")
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-shorting" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Num</th>
+                                <th>Name Surname</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Edit</th>
+                                <th>View</th>
+                                <th>PDF</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr data-id="@item.Id">
+
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FullName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.DateTime)
+                                    </td>
+                                    <td class="halfDescription">
+                                        <p> @Html.DisplayFor(modelItem => item.Description)</p>
+                                    </td>
+
+                                    <td>
+                                        <button utton name="id" data-itemId="@item.Id" type="button" class="btn btn-warning" data-toggle="modal" data-target="@("#editDialog-" + item.Id)" data-url="@Url.Action($"Edit/{item.Id}")" id="GetReadFile">Edit</button>
+                                        @await Html.PartialAsync("_EditPartialView",item)
+                                    </td>
+                                    <td>
+                                        @*  <img name="id" id="readFile" data-itemId="@item.Id" width="30" height="30" src="https://img.icons8.com/color/48/info--v1.png" alt="info--v1" />*@
+
+                                        <button utton type="button" class="btn btn-info" data-toggle="modal" data-target="@("#detailDialog-" + item.Id)" data-url="@Url.Action($"Detail/{item.Id}")">Detail</button>
+
+                                        @await Html.PartialAsync("_DetailPartialView",item)
+
+                                    </td>
+                                    <td>
+                                        <img name="id" id="readFile" data-itemId="@item.Id" width="30" height="30" src="https://img.icons8.com/office/40/pdf-2.png" alt="pdf-2" />
+                                    </td>
+                                    <td>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn text-danger" onclick="return confirm('Silmek istediğinizden emin misiniz?')"><img width="30" height="30" src="https://img.icons8.com/plasticine/100/filled-trash.png" alt="filled-trash" /></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div id="123"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+@*@section Scripts{
+    <script src="~/js/main.js"></script>
+
+}*@
+
+@*<script>
+    $(document).on("click", "#GetReadFile", (e) => {
+        let itemId = e.target.attributes[2].value;
+        $.ajax({
+            url: "/Home/ViewPdf",
+            type: "POST",
+            data: { fileId: itemId },
+            success: (res) => {
+                console.log(res)
+                readURL12(res.base64);
+
+
+            }, error: (err) => {
+                alert(err.message)
+            }
+        })
+
+
+    })
+
+</script>*@
+
+<script>
+    $(document).on("click", "#readFile", (e) => {
+        let itemId = e.target.attributes[2].value;
+
+        $.ajax({
+            url: "/Home/ViewPdf",
+            type: "POST",
+            data: { fileId: itemId },
+            success: (res) => {
+
+                console.log(res)
+                openPdfInNewTab(res.base64);
+
+
+            }, error: (err) => {
+                alert(err.message)
+            }
+        })
+
+
+    })
+
+    function openPdfInNewTab(base64String) {
+        console.log(base64String)
+        // Convert the base64 string to a Blob
+        const byteCharacters = atob(base64String.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length).fill(0).map((_, i) => byteCharacters.charCodeAt(i));
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+        // Create a URL for the Blob
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Open the URL in a new tab
+        window.open(blobUrl, '_blank');
+    }
+
+
+</script>
+<script>
+    (() => {
+        const addButton = document.getElementById("addDetails");
+        const updateButton = document.getElementById("updateDetails");
+        const closeButton1 = document.getElementById("close");
+        const closeButton2 = document.getElementById("closeButton");
+        const dialog = document.getElementById("favDialog");
+        dialog.returnValue = "favAnimal";
+        // updateDialog.returnValue = "favAnimal";
+
+        function openCheck(dialog) {
+            if (dialog.open) {
+                console.log("Dialog open");
+            } else {
+                console.log("Dialog closed");
+            }
+        }
+
+
+
+        // Add button opens a modal dialog
+        addButton.addEventListener("click", () => {
+            dialog.showModal();
+            openCheck(dialog);
+        });
+
+
+
+        // Form close button closes the dialog box
+        closeButton1.addEventListener("click", () => {
+            dialog.close("animalNotChosen");
+            openCheck(dialog);
+
+            myResetFunction()
+        });
+
+        closeButton2.addEventListener("click", () => {
+            dialog.close("animalNotChosen");
+            openCheck(dialog);
+
+            // myResetFunction()
+        });
+    })();
+
+    function myResetFunction() {
+        document.getElementById("form").reset();
+        document.getElementById("descrption").value = '';
+
+        let $el = $('#image-holder-1');
+        $el.wrap('<img>').closest(
+            'img').get(0).remove();
+
+    }
+</script>

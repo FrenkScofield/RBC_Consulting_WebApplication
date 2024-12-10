@@ -1,0 +1,161 @@
+﻿@model CustomerInfo
+<!--Update Data Simple pop-up dialog box, containing a form -->
+<!-- Modal -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+<div class="modal fade" id="editDialog-@Model.Id" aria-label="EditCustomer lamel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:150%;    margin-left: -88px;
+    margin-top: 100px;">
+            <div class="modal-header">
+                <p style="    font-size: 21px;
+    font-family: cursive;
+    color: #939393;">Edit Current Customer</p>
+                <button type="button" class="close" id="Eclose" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Edit" enctype="multipart/form-data" method="post" id="form">
+                    <input asp-for="Id" hidden />
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <input type="hidden" asp-for="Id" />
+                                    <label for="exampleInputName">Name</label>
+                                    <input type="text" class="form-control" aria-describedby="NameHelp" placeholder="Enter Name" id="EfulName" asp-for="FullName">
+
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="exampleInputDescription">Description</label>
+                                    <textarea class="form-control" placeholder="Enter Description" rows="4" cols="4" asp-for="Description" id="Edescrption"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div id="EcurrentFile" class="form-group" style="margin-top: 47px;
+    border: 1px solid #c1c1c1e3;
+    padding: 7px;
+    border-radius: 6px;
+    width: 90%;">
+                                <label style="display:block">Current File</label>
+                                <img width="50" height="50" name="Id" id="readFile" src="https://img.icons8.com/office/40/pdf-2.png" alt="pdf-2" /><span>@Model.FileName </span>
+                            </div>
+                            <div class="form-group" style=" margin-top: 15px;">
+                                <input type="file" id="upload1" style=" border: 1px solid #cfcfcf;
+                                width: 90%;
+                                height: 40px;
+                                padding: 4px 0px;
+                                color:#939393;
+                                border-radius: 8px;" accept="application/pdf,image/*">
+                            </div>
+                            <div id="image-holder1" class="list-group"></div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="resetEdit">Reset</button>
+                        <input type="submit" value="Update" class="btn btn-warning" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*JS scripts used to instantly display each file loaded from input*@
+
+@*<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>*@
+
+<script>
+    let EReset = document.getElementById("resetEdit")
+    let Ename = document.getElementById("EfulName")
+    let Edes = document.getElementById("Edescrption")
+    let EchooseFile = document.getElementById("upload1")
+    let EhedClose = document.getElementById("Eclose")
+    let currentFile = document.getElementById("EcurrentFile")
+
+
+    EReset.addEventListener("click", () => {
+
+        Ename.value = '';
+        Edes.value = '';
+        EchooseFile.value = '';
+        currentFile.style.display = 'none';
+
+        let $el = $('#image-holder1');
+        $el.wrap('<img>').closest(
+            'img').get(0).remove();
+    });
+
+    //EhedClose.addEventListener("click", () => {
+
+    //    Ename.value = '';
+    //    Edes.value = '';
+    //    EchooseFile.value = '';
+    //    currentFile.style.display = 'none';
+
+    //    let $el = $('#image-holder1');
+    //    $el.wrap('<img>').closest(
+    //        'img').get(0).remove();
+    //});
+</script>
+
+
+<script>
+    function readURL1(input1, imgno1) {
+
+        let file1 = input1.files[0];
+
+        var reader1 = new FileReader();
+
+        reader1.onload = function (e) {
+
+            let src1 = file1.type.startsWith("image") ? e.target.result : defaultImage1;
+            let size1 = (file1.size / 1024).toFixed(0);
+            let date1 = new Date(file1.lastModified).toLocaleDateString();
+
+            $("#image-holder1").append(`
+                                          <div id="image-holder-${imgno1}" style="    width: 90%;
+        height: 137px;" class="list-group-item">
+                                        <div class="row">
+                                          <div class="col-3">
+                                                    <img style="    height: 80px;" src="${src1}" class="thumb-image">
+                                          </div
+                                          <div class="col">
+                                            <ul style="font-size:small">
+                                              <li>Filename: ${file1.name}</li>
+                                              <li>Type: ${file1.type}</li>
+                                              <li>Size: ${size1} kb</li>
+                                              <li>Date: ${date1}</li>
+                                               <li><button id="deleteImgFunction1"  class="btn btn-danger  mt-1">Remove</button></li>
+                                            </ul>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    `);
+            //In Modal windows, tis function  file for deleting , in this moment  current file
+            $('#deleteImgFunction1').on('click', function (e) {
+                let $el = $('#image-holder1');
+                $el.wrap('<img>').closest(
+                    'img').get(0).remove();
+
+                document.getElementById("upload1").value = '';
+            });
+        }
+        reader1.readAsDataURL(file1);
+    }
+
+    let defaultImage1 = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/833px-PDF_file_icon.svg.png";
+
+
+    upload1.addEventListener("change", function (e) {
+        readURL1(this, 2);
+    });
+
+</script>
