@@ -1,8 +1,13 @@
 ﻿// Call the dataTables jQuery plugin
 $(document).ready(function() {
     $('#dataTable').DataTable({
-        "ordering": false,
+        "ordering": true,
         "bFilter": true,
+        "order": [[1, 'desc']], 
+        "columnDefs": [
+            { "orderable": true, "targets": [0,1,2,3] }, // Ensure the "Name Surname" column is sortable,
+            { "orderable": false, "targets": [4, 5, 6, 7] } 
+        ],
         "language": {
             "sDecimal": ",",
             "sEmptyTable": "Tabloda herhangi bir veri mevcut değil",

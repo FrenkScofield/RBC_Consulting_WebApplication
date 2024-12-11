@@ -1,14 +1,71 @@
 ﻿@model CustomerInfo
-<div class="modal fade" id="detailDialog-@Model.Id" aria-label="DetailCustomer lamel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<style>
+    .detailModalBody {
+        border: 1px solid #a3a1a1;
+        border-radius: 5px;
+        margin: 12px 20px;
+    }
+
+        .detailModalBody h2 .customLogo .parent {
+            margin: 0px;
+            height: 37px;
+            color: #4166a9;
+            font-size: 37px;
+            font-family: sans-serif;
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        .detailModalBody h2 .customLogo .child {
+            font-size: 19px;
+            padding-left: 2px;
+            color: #4166a9;
+            font-family: sans-serif;
+            font-weight: 600;
+        }
+
+        .detailModalBody h2 .col-7 p {
+            color: #4166a9;
+            font-size: 32px;
+            margin: 9px 0px -3px 3px;
+            font-weight: 700;
+        }
+
+    dl .col-sm-6 span {
+        font-size: 17px;
+        float: right;
+        padding-right: 15px;
+        padding-top: 20px;
+        color: black;
+    }
+
+</style>
+<div class="modal fade" id="detailDialog-@Model.Id" aria-modal="true" aria-label="DetailCustomer lamel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <p style="font-size: 21px;
+    font-family: cursive;
+    color: #939393;margin: 0px;">Detail Info</p>
+                <button type="button" class="close" id="Dclose" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
+
             </div>
-            <div class="modal-body">
+
+            <div class="modal-body detailModalBody">
+                <h2>
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col-3 customLogo">
+                            <p class="parent">RBC</p>
+                            <p class="child">consulting</p>
+                        </div>
+                        <div class="col-7" style="padding-left:2px">
+                            <p> Customer Detail</p>
+                        </div>
+                    </div>
+                </h2>
                 <dl class="row">
                     <dt class="col-4">
                         @Html.DisplayNameFor(model => model.FullName)
@@ -22,12 +79,90 @@
                     <dd class="col-sm-9">
                         @Html.DisplayFor(model => model.Description)
                     </dd>
+                    <dt class="col-4">
+                        Data Time
+                    </dt>
+                    <dd class="col-sm-9">
+                        @Html.DisplayFor(model => model.DateTime)
+                    </dd>
+
+                    <div class="col-sm-6">
+                        <dt>
+                            File Name
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.FileName)
+                        </dd>
+                        <dt>
+                            File Type
+                        </dt>
+                        <dd>
+                            @Html.DisplayFor(model => model.ContentType)
+                        </dd>
+                    </div>
+                    <div class="col-sm-6">
+
+                        <img src="~/css/img/RBCLogo.jpg" alt="RBC consulting logo" />
+                        <span>Print date: @DateTime.Now.Date.ToShortDateString()</span>
+                    </div>
+
                 </dl>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button id="close-@Model.Id" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id="print-@Model.Id" type="button" class="btn btn-primary">Print Page</button>
+
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    (() => {
+
+        document.addEventListener("click", function (e) {
+            if (e.target && e.target.id === `print-@Model.Id`) {
+                console.log(e.target)
+                console.log(e)
+
+                var printContentsElement = document.getElementById("detailDialog-@Model.Id");
+
+                printContentsElement.querySelector('.modal-dialog').classList.add('m-0');
+                printContentsElement.querySelector('.modal-content').classList.add('vw-100');
+                printContentsElement.querySelector('.modal-content').classList.add('vh-100');
+
+                var printContents = printContentsElement.innerHTML
+                let originalContents = document.body.innerHTML;
+
+                document.body.innerHTML = printContents;
+
+                window.print();
+
+                location.reload();
+
+
+                //document.body.innerHTML = originalContents;
+                //document.getElementById("detailDialog-@Model.Id").querySelector('.modal-dialog').classList.remove('m-0');
+                //document.getElementById("detailDialog-@Model.Id").querySelector('.modal-content').classList.remove('vw-100');
+                //document.getElementById("detailDialog-@Model.Id").querySelector('.modal-content').classList.remove('vh-100');
+                
+                //let getPrintModal = document.getElementById("print-@Model.Id").parentElement.parentElement.parentElement.parentElement;
+
+                //getPrintModal.classList.remove("show");
+                //getPrintModal.removeAttribute("style");
+                //getPrintModal.setAttribute("style", "display:none;");
+                //document.querySelectorAll(".modal-backdrop").forEach(element => {
+                //    element.remove();
+                //});
+
+                //var modalElement = document.getElementById('detailDialog-@Model.Id'); // Replace 'myModal' with your modal's ID
+                //var bootstrapModal = bootstrap.Modal.getInstance(modalElement); // Get the modal instance
+                //bootstrapModal.hide();
+            }
+        });
+
+
+
+    })()
+
+</script> 

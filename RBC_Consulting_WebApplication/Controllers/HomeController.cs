@@ -29,8 +29,8 @@ namespace RBC_Consulting_WebApplication.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-           
-            var customers = await _context.CustomerInfos.ToListAsync();
+
+            var customers = await _context.CustomerInfos.OrderByDescending(x => x.Id).ToListAsync();
 
             return View(customers);
         }
@@ -68,10 +68,43 @@ namespace RBC_Consulting_WebApplication.Controllers
         [HttpGet]
         public IActionResult Edit(int Id)
         {
-            var customers =  _context.CustomerInfos.Where(f => f.Id == Id).FirstOrDefault();
+            var customers = _context.CustomerInfos.Where(f => f.Id == Id).FirstOrDefault();
 
             return PartialView("_EditPartialView", customers);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(IFormFile file, CustomerInfo customerInfo)
+        {
+            if (customerInfo == null)
+            {
+                return BadRequest();
+            }
+
+            var oldCustomers = await _context.CustomerInfos.FindAsync(customerInfo.Id);
+
+            if(file != null) {
+                using var memoryStream = new MemoryStream();
+                await file.CopyToAsync(memoryStream);
+
+                oldCustomers.FileName = file.FileName;
+                oldCustomers.ContentType = file.ContentType;
+                oldCustomers.Data = memoryStream.ToArray();
+            }
+                oldCustomers.FullName = customerInfo.FullName;
+                oldCustomers.DateTime = DateTime.Now;
+                oldCustomers.Description = customerInfo.Description;
+           
+
+            _context.CustomerInfos.Update(oldCustomers);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
 
         [HttpGet]
         public IActionResult Detail(int Id)
@@ -99,9 +132,9 @@ namespace RBC_Consulting_WebApplication.Controllers
         //}
 
         [HttpPost]
-        public IActionResult ViewPdf(int fileId)
+        public IActionResult ViewPdf(int id)
         {
-            var customers = _context.CustomerInfos.Where(f => f.Id == fileId).FirstOrDefault();
+            var customers = _context.CustomerInfos.Where(f => f.Id == id).FirstOrDefault();
 
             String base64 = System.Convert.ToBase64String(customers.Data);
 
@@ -118,13 +151,13 @@ namespace RBC_Consulting_WebApplication.Controllers
 
         public async Task<IActionResult> Delete(int Id)
         {
-           var customers = await _context.CustomerInfos.FindAsync(Id);
-             _context.CustomerInfos.Remove(customers);
+            var customers = await _context.CustomerInfos.FindAsync(Id);
+            _context.CustomerInfos.Remove(customers);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-       
-       
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

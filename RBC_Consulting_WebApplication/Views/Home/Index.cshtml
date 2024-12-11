@@ -39,13 +39,29 @@
         inset: 0px;
         background: #0d0e0ec7;
     }
+
+    th.sorting:after { /* Default state */
+        content: "⇅"; /* Custom icon */
+        font-size: 12px;
+        margin-left: 5px;
+    }
+
+    th.sorting_asc:after { /* Ascending sort */
+        content: "↑";
+    }
+
+    th.sorting_desc:after { /* Descending sort */
+        content: "↓";
+    }
+
 </style>
 
 <div class="row">
+    <div class="col-md-1"></div>
     <div class="col-md-10 my-4">
         <div class="card shadow mb-4">
             <div class="card-header py-4">
-                Customers
+                RBS consulting Customers Info
             </div>
             <div class="row">
                 <div class="col-md-12 my-4">
@@ -59,13 +75,9 @@
                         <thead>
                             <tr>
                                 <th>Num</th>
-                                <th>Name Surname</th>
+                                <th class="sorting">Name Surname</th>
                                 <th>Date</th>
                                 <th>Description</th>
-                                <th>Edit</th>
-                                <th>View</th>
-                                <th>PDF</th>
-                                <th>Delete</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,15 +103,15 @@
                                         @await Html.PartialAsync("_EditPartialView",item)
                                     </td>
                                     <td>
-                                        @*  <img name="id" id="readFile" data-itemId="@item.Id" width="30" height="30" src="https://img.icons8.com/color/48/info--v1.png" alt="info--v1" />*@
 
-                                        <button utton type="button" class="btn btn-info" data-toggle="modal" data-target="@("#detailDialog-" + item.Id)" data-url="@Url.Action($"Detail/{item.Id}")">Detail</button>
+                                       @* <button  type="button" class="btn btn-info" data-toggle="modal" data-target="@("#detailDialog-" + item.Id)" data-url="@Url.Action($"Detail/{item.Id}")">Detail</button>*@
 
+                                        <a data-toggle="modal" data-target="@("#detailDialog-" + item.Id)" data-url="@Url.Action($"Detail/{item.Id}")"> <img width="30" height="30" src="https://img.icons8.com/color/48/info--v1.png" style="cursor:pointer;" alt="info--v1" /></a>
                                         @await Html.PartialAsync("_DetailPartialView",item)
 
                                     </td>
                                     <td>
-                                        <img name="id" id="readFile" data-itemId="@item.Id" width="30" height="30" src="https://img.icons8.com/office/40/pdf-2.png" alt="pdf-2" />
+                                        <img name="id" id="readIndexFile" data-itemId="@item.Id" width="30" height="30" src="https://img.icons8.com/office/40/pdf-2.png" alt="pdf-2" />
                                     </td>
                                     <td>
                                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn text-danger" onclick="return confirm('Silmek istediğinizden emin misiniz?')"><img width="30" height="30" src="https://img.icons8.com/plasticine/100/filled-trash.png" alt="filled-trash" /></a>
@@ -114,6 +126,8 @@
             </div>
         </div>
     </div>
+    <div class="col-md-1"></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
@@ -150,12 +164,35 @@
 
 <script>
     $(document).on("click", "#readFile", (e) => {
-        let itemId = e.target.attributes[2].value;
+
+        let dataId = e.target.parentElement.getAttribute("data-model-id");
 
         $.ajax({
             url: "/Home/ViewPdf",
             type: "POST",
-            data: { fileId: itemId },
+            data: { id: dataId },
+            success: (res) => {
+
+                console.log(res)
+                openPdfInNewTab(res.base64);
+
+
+            }, error: (err) => {
+                alert(err.message)
+            }
+        })
+
+
+    })
+
+    $(document).on("click", "#readIndexFile", (e) => {
+
+        let dataId = e.target.getAttribute("data-itemId");
+
+        $.ajax({
+            url: "/Home/ViewPdf",
+            type: "POST",
+            data: { id: dataId },
             success: (res) => {
 
                 console.log(res)
