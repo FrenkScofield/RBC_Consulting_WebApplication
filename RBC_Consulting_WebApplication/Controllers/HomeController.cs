@@ -38,11 +38,14 @@ namespace RBC_Consulting_WebApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(IFormFile file, CustomerInfo customerInfo)
         {
-            if (customerInfo == null)
+            if (customerInfo.FullName == null || customerInfo.Description == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
+            if (file == null)
+            {
+                return NotFound();
+            }
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
 
@@ -76,9 +79,9 @@ namespace RBC_Consulting_WebApplication.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(IFormFile file, CustomerInfo customerInfo)
         {
-            if (customerInfo == null)
+            if (customerInfo.FullName == null || customerInfo.Description == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var oldCustomers = await _context.CustomerInfos.FindAsync(customerInfo.Id);
@@ -103,9 +106,6 @@ namespace RBC_Consulting_WebApplication.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
-
         [HttpGet]
         public IActionResult Detail(int Id)
         {
@@ -113,23 +113,6 @@ namespace RBC_Consulting_WebApplication.Controllers
 
             return PartialView("_DetailPartialView", customers);
         }
-        //[HttpGet]
-        //public async Task<IActionResult> DownloadPdf(int id)
-        //{
-        //    var pdfFile = await _context.CustomerInfos.FindAsync(id);
-        //    if (pdfFile == null)
-        //        return NotFound();
-
-        //    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "files", pdfFile.FileName);
-        //    if (!System.IO.File.Exists(filePath))
-        //    {
-        //        return NotFound("File not found");
-        //    }
-
-        //    var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        //    return File(fileStream, "application/pdf");
-        //   // return File(pdfFile.Data, pdfFile.ContentType, pdfFile.FileName);
-        //}
 
         [HttpPost]
         public IActionResult ViewPdf(int id)
